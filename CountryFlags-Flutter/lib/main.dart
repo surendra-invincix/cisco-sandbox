@@ -6,11 +6,14 @@ import 'package:http/http.dart' as http;
 
 //Create a ModelClass FlagData to store response of the API
 class FlagData {
-  late bool error;
-  late String msg;
-  late List<Data> data;
+  late bool error; // set bolean variable
+  late String msg; // set message variable
+  late List<Data> data; // set list of data variable
 
-  FlagData({required this.error, required this.msg, required this.data});
+  FlagData(
+      {required this.error,
+      required this.msg,
+      required this.data}); // flagdata constructor
 
   //fromJson & toJson function helps in parsing the api data
   FlagData.fromJson(Map<String, dynamic> json) {
@@ -41,7 +44,7 @@ class Data {
   late String name;
   late String unicodeFlag;
 
-  Data({required this.name, required this.unicodeFlag});
+  Data({required this.name, required this.unicodeFlag}); // constructor of data
 
   Data.fromJson(Map<String, dynamic> json) {
     name = json['name'];
@@ -73,21 +76,20 @@ Future<FlagData> fetchData() async {
 }
 
 void main() {
-  runApp(MaterialApp(
-    debugShowCheckedModeBanner: false,
-    title: "Simple Intrest Calculator",
-    theme: ThemeData(
-        brightness: Brightness.light, // for backgrund color
-        primaryColor: Colors.green, //for app bar
-        accentColor: Colors.lightGreen //for overscoll edge effect and nobs
-        ),
-    home: Scaffold(
-        appBar: AppBar(
-          title: Text("Countrys App"),
-        ),
-        body: MyApp()),
-  ));
+  runApp(
+    MaterialApp(
+      debugShowCheckedModeBanner: false, // disable debaug flag
+      title: "Simple Intrest Calculator",
+      theme: ThemeData(
+          brightness: Brightness.light, // for backgrund color
+          primaryColor: Colors.green, //for app bar
+          accentColor: Colors.lightGreen //for overscoll edge effect and nobs
+          ),
+      home: MyApp(),
+    ),
+  );
 }
+
 //create a stateful widget
 class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -102,48 +104,106 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    futureData = fetchData();
+
+    futureData = fetchData(); // fetchdata when this widget build
   }
+
+  bool listbutton = true; // set for liatview or gridview conditions
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-        child: Center(
-            child: FutureBuilder(
-      future: futureData,
-      builder: (BuildContext context, AsyncSnapshot<FlagData> snapshot) {
-        if (snapshot.hasData) {
-          FlagData content = new FlagData(
-              error: snapshot.data!.error,
-              msg: snapshot.data!.msg,
-              data: snapshot.data!.data);
-          List<Data> flags = content!.data;
-
-          return ListView.separated(
-              itemCount: flags.length,
-              separatorBuilder: (context, index) => const Divider(
-                    height: 1.0,
-                  ),
-              itemBuilder: (BuildContext context, int index) {
-                return Container(
-                  height: 75,
-                  color: Colors.white,
-                  child: Center(
-                    child: Text(
-                      flags[index]!.unicodeFlag + "  " + flags[index]!.name,
-                      style: TextStyle(
-                          fontSize: 16.0, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                );
+    final orientation = MediaQuery.of(context)
+        .orientation; // here we set orientation for grid view
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Country Flags'),
+        actions: [
+          IconButton(
+            onPressed: () {
+              setState(() {
+                listbutton =
+                    !listbutton; //here we change listview to gridview or vice-versa
               });
-        } else if (snapshot.hasError) {
-          print(snapshot);
-          return Text('Error');
-        }
+            },
+            icon: Icon(
+              listbutton
+                  ? Icons.list_outlined
+                  : Icons
+                      .apps_outlined, // here we use ternary experession for icons
+            ),
+          )
+        ],
+      ),
+      body: Container(
+        child: Center(
+          child: FutureBuilder(
+            // futurebuilder use for collecting data from http responese
+            future: futureData, // here we call the function where api calling
+            builder: (BuildContext context, AsyncSnapshot<FlagData> snapshot) {
+              if (snapshot.hasData) {
+                FlagData content = new FlagData(
+                    error: snapshot.data!.error,
+                    msg: snapshot.data!.msg,
+                    data: snapshot.data!.data);
+                List<Data> flags = content!.data; // set the data from server
 
-        return const CircularProgressIndicator();
-      },
-    )));
+                return listbutton // by condition if listbutton true then its listview else its grid view
+                    ? ListView.separated(
+                        itemCount: flags.length,
+                        separatorBuilder: (context, index) => const Divider(
+                              height: 1.0,
+                            ),
+                        itemBuilder: (BuildContext context, int index) {
+                          return Container(
+                            height: 75,
+                            color: Colors.white,
+                            child: Center(
+                              child: Text(
+                                flags[index]!.unicodeFlag +
+                                    "  " +
+                                    flags[index]!.name,
+                                style: TextStyle(
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          );
+                        })
+                    : GridView.builder(
+                        // for gridview we use grid builder
+                        itemCount: flags.length,
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount:
+                                (orientation == Orientation.portrait) ? 2 : 4),
+                        itemBuilder: (BuildContext context, int index) {
+                          return new Card(
+                            child: new GridTile(
+                              footer: new Text(
+                                flags[index]!.name,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 25,
+                                ),
+                              ),
+                              child: new Text(
+                                flags[index]!.unicodeFlag,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(fontSize: 100),
+                              ), //just for testing, will fill with image later
+                            ),
+                          );
+                        },
+                      );
+              } else if (snapshot.hasError) {
+                print(snapshot);
+                return Text('Error');
+              }
+
+              return const CircularProgressIndicator();
+            },
+          ),
+        ),
+      ),
+    );
   }
 }
