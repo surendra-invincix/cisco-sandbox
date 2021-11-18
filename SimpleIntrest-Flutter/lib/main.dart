@@ -33,15 +33,17 @@ class _SimpleIntrestState extends State<SimpleIntrest> {
   var displayResult = "";
 
   //adding textController
-  TextEditingController pricipal = TextEditingController();
+  TextEditingController pricipal =
+      TextEditingController(); // text input controller
   TextEditingController rate = TextEditingController();
   TextEditingController term = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(_minimumpadding * 2),
+      padding: EdgeInsets.all(
+          _minimumpadding * 2), // set paddings respect to _minimumpadding
       child: Form(
-        key: _formKey,
+        key: _formKey, // here we set globalkey for access form data
         child: ListView(
           children: <Widget>[
             Container(
@@ -58,6 +60,7 @@ class _SimpleIntrestState extends State<SimpleIntrest> {
               padding: EdgeInsets.only(
                   top: _minimumpadding, bottom: _minimumpadding),
               child: TextFormField(
+                ///set textform inputs
                 keyboardType: TextInputType.number,
                 controller: pricipal,
                 validator: (value) {
@@ -67,8 +70,10 @@ class _SimpleIntrestState extends State<SimpleIntrest> {
                   return null;
                 },
                 decoration: InputDecoration(
+                    // decorate tectinput field
                     labelText: "Principal",
                     errorStyle: TextStyle(
+                      // set error styling
                       color: Colors.yellowAccent,
                       fontSize: 15.0,
                     ),
@@ -194,6 +199,7 @@ class _SimpleIntrestState extends State<SimpleIntrest> {
         "After $t  years, your investement will be worth $simpleIntrest $_currency ";
     return result;
   }
+
 //on reset click this function clear all the feilds in the textinput
   void _reset() {
     pricipal.text = "";
